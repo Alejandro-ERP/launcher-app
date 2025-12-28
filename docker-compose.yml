@@ -3,51 +3,62 @@ services:
     image: nats:2.9.8
     ports:
       - 8222:8222
-    
+
   client-gateway:
     build: ./client-gateway
     ports:
-      - ${CLIENT_GATEWAY_PORT}:3000
+      - ${CLIENT_GATEWAY_PORT}:${CLIENT_GATEWAY_PORT}
     volumes:
       - ./client-gateway/src:/usr/src/app/src
     command: npm run start:dev
     environment:
-      - PORT=3000
+      - PORT=${CLIENT_GATEWAY_PORT}
       - NATS_SERVERS=nats://nats_server:4222
 
-  products-ms:
-    build: ./products-ms
+  # products-ms:
+  #   build: ./products-ms
+  #   volumes:
+  #     - ./products-ms/src:/usr/src/app/src
+  #   command: npm run start:dev
+  #   environment:
+  #     - PORT=3001
+  #     - NATS_SERVERS=nats://nats_server:4222
+  #     - DATABASE_URL=file:/usr/src/app/dev.db
+
+  # orders-db:
+  #   image: postgres:14
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - ./orders-ms/postgres:/var/lib/postgresql/data
+  #   environment:
+  #     POSTGRES_USER: alejandro
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: ordersdb
+
+  # orders-ms:
+  #   depends_on:
+  #     - orders-db
+  #   build: ./orders-ms
+  #   volumes:
+  #     - ./orders-ms/src:/usr/src/app/src
+  #   command: npm run start:dev
+  #   environment:
+  #     - PORT=3002
+  #     - NATS_SERVERS=nats://nats_server:4222
+  #     - DATABASE_URL=postgresql://alejandro:postgres@orders-db:5432/ordersdb
+
+  payments-ms:
+    build: ./payments-ms
     volumes:
-      - ./products-ms/src:/usr/src/app/src
-    command: npm run start:dev
-    environment:
-      - PORT=3001
-      - NATS_SERVERS=nats://nats_server:4222
-      - DATABASE_URL=file:/usr/src/app/dev.db
-
-
-  orders-db:
-    image: postgres:14
-    restart: always
+      - ./payments-ms/src:/usr/src/app/src
     ports:
-      - "5432:5432"
-    volumes:
-      - ./orders-ms/postgres:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: alejandro
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ordersdb
-
-  
-  orders-ms:
-    depends_on:
-      - orders-db
-    build: ./orders-ms
-    volumes:
-      - ./orders-ms/src:/usr/src/app/src
+      - ${PAYMENTS_MS_PORT}:${PAYMENTS_MS_PORT}
     command: npm run start:dev
     environment:
-      - PORT=3002
+      - PORT=${PAYMENTS_MS_PORT}
       - NATS_SERVERS=nats://nats_server:4222
-      - DATABASE_URL=postgresql://alejandro:postgres@orders-db:5432/ordersdb
-
+      - STRIPE_SECRET_END_POINT_KEY=${STRIPE_SECRET_END_POINT_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
