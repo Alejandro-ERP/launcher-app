@@ -1,5 +1,6 @@
-dist/
-node_modules/
+node_modules
+dist
+.git
+.gitignore
+README.md
 .env
-.DS_Store
-.vscode/

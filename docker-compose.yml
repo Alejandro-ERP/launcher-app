@@ -5,7 +5,9 @@ services:
       - 8222:8222
 
   client-gateway:
-    build: ./client-gateway
+    build:
+      context: ./client-gateway
+      dockerfile: Dockerfile
     ports:
       - ${CLIENT_GATEWAY_PORT}:${CLIENT_GATEWAY_PORT}
     volumes:
@@ -16,10 +18,12 @@ services:
       - NATS_SERVERS=nats://nats_server:4222
 
   products-ms:
-    build: ./products-ms
+    build:
+      context: ./products-ms
+      dockerfile: Dockerfile
     volumes:
       - ./products-ms/src:/usr/src/app/src
-      - ./products-ms/prisma:/usr/app/prisma
+      - ./products-ms/prisma:/usr/src/app/prisma
     command: npm run start:dev
     environment:
       - PORT=3001
@@ -47,7 +51,9 @@ services:
     depends_on:
       orders-db:
         condition: service_healthy
-    build: ./orders-ms
+    build:
+      context: ./orders-ms
+      dockerfile: Dockerfile
     volumes:
       - ./orders-ms/src:/usr/src/app/src
       - ./orders-ms/prisma:/usr/src/app/prisma
@@ -57,7 +63,9 @@ services:
       - DATABASE_URL=postgresql://alejandro:postgres@orders-db:5432/ordersdb
 
   payments-ms:
-    build: ./payments-ms
+    build:
+      context: ./payments-ms
+      dockerfile: Dockerfile
     volumes:
       - ./payments-ms/src:/usr/src/app/src
     ports:
